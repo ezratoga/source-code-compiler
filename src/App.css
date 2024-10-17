@@ -1,4 +1,4 @@
-.App {
+/* .App {
   text-align: center;
 }
 
@@ -35,4 +35,43 @@
   to {
     transform: rotate(360deg);
   }
+} */
+
+.App {
+  text-align: center;
 }
+
+select, button {
+  margin: 10px;
+  padding: 10px;
+  font-size: 16px;
+}
+
+.input-prompt {
+  width: 100%;
+  background-color: #1e1e1e;
+  color: #00ff00;
+  border: none;
+  font-family: 'Courier New', Courier, monospace;
+  padding: 10px;
+}
+
+pre {
+  background-color: #1e1e1e;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.output-container {
+  background-color: #1e1e1e; /* Dark background */
+  color: #00ff00; /* Green text to simulate CLI */
+  font-family: 'Courier New', Courier, monospace; /* Monospace font */
+  padding: 20px;
+  border-radius: 5px;
+  height: 300px;
+  overflow-y: auto; /* Scrollable if content overflows */
+  white-space: pre-wrap; /* Preserve spaces and line breaks */
+  margin-top: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Optional: add depth */
+}
+
