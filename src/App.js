@@ -62,6 +62,9 @@ function App() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (input.trim()) {
+      if (code) {
+        handleCompile();
+      }
       setInput('');
     }
   };

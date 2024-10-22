@@ -28,6 +28,30 @@ export const handleIfAnynput = async (language = '', code = '', input = '') => {
       return question;
     }
     break;
+  case 'java':
+    if (code && code?.includes('new Scanner(') && code?.includes('.nextLine()') && !input) {
+      const getIndexNextLine = code?.indexOf('nextLine();')+11;
+      const getCommandIfAny = code?.indexOf('System.out.println(\'', getIndexNextLine);
+      const question = getCommandIfAny > 0 ?
+        code?.substring('System.out.println(\'', getCommandIfAny)?.split('\'')[0] : '';
+      return question;
+    }
+    break;
+  case 'python':
+    if (code && code?.includes('input()') && !input) {
+      const question = 'ada';
+      return question;
+    }
+    break;
+  case 'csharp.net':
+    if (code && code?.includes('Console.ReadLine();') && !input) return 'ada';
+    break;
+  case 'c':
+    if (code && code?.includes('scanf(') && !input) return 'ada';
+    break;
+  case 'c++':
+    if (code && (code?.includes('scanf(') || code?.trim()?.includes('cin>>')) && !input) return 'ada';
+    break;
   default:
     return '';
   }
