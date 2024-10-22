@@ -30,11 +30,18 @@ import CodeEditor from "./components/CodeEditor";
 import { compileCode } from "./api";
 import { Output } from "./components/Output";
 import './App.css';
+import { basicSyntax } from "./helper/constant";
 
 function App() {
   const [language, setLanguage] = useState("javascript");
   const [code, setCode] = useState("");
   const [output, setOutput] = useState("");
+
+  const handleOption = async (event) => {
+    const value = event.target.value;
+    setLanguage(value);
+    setCode(basicSyntax[value] || '// Write your code here');
+  };
 
   const handleCompile = async () => {
     const result = await compileCode(language, code);
@@ -49,18 +56,19 @@ function App() {
     <div className="App">
       <h1>Online Code Compiler</h1>
 
-      <select onChange={(e) => setLanguage(e.target.value)} value={language}>
+      <select onChange={(e) => handleOption(e)} value={language}>
         <option value="javascript">JavaScript</option>
         <option value="python">Python</option>
-        <option value="cpp">C++</option>
+        <option value="c">C</option>
+        <option value="c++">C++</option>
+        <option value="csharp.net">C#</option>
         <option value="java">Java</option>
       </select>
 
       <button onClick={handleCompile}>Compile & Run</button>
       <button onClick={resetOutput}>Clear Output</button>
       
-      <CodeEditor language={language} onCodeChange={setCode} />
-      {/* <h2>Output:</h2> */}
+      <CodeEditor language={language} onCodeChange={setCode} initial={code} />
       <Output output={output} />
     </div>
   );

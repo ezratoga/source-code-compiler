@@ -5,6 +5,7 @@ export function Output({ output }) {
   const [displayedOutput, setDisplayedOutput] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);  
   const [input, setInput] = useState("");
+  const [isOutputAdded, setOutputAdded] = useState(false); // Flag to ensure static string is added only once
   const outputRef = useRef(null); // Reference to the output container
 
   useEffect(() => {
@@ -24,7 +25,13 @@ export function Output({ output }) {
     }
   }, [displayedOutput]);
 
-  const handleInputChange = (e) => setInput(e.target.value);
+  const handleInputChange = (e) => {
+    if (output && !isOutputAdded && !e.target.value) setInput(output);
+    if (!isOutputAdded && e.target.value) {
+      setInput(`${output}${e.target.value}`);
+      setOutputAdded(true);
+    } else setInput(e.target.value)
+  };
 
   // const handleKeyPress = (e) => {
   //   if (e.key === "Enter") {
@@ -41,11 +48,11 @@ export function Output({ output }) {
         // onKeyUp={handleKeyPress}
         className="input-prompt"
       />
-      {/* <textarea
-        value={output ?? input}
+      <textarea
+        value={input}
         onChange={handleInputChange}
       >
-      </textarea> */}
+      </textarea>
       <pre>{displayedOutput === output ? displayedOutput : output}</pre>
     </div>
   );
