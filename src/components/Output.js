@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import '../App.css'
 
-export function Output({ output }) {
+export function Output({ output, input }) {
   const [displayedOutput, setDisplayedOutput] = useState("");
-  const [currentIndex, setCurrentIndex] = useState(0);  
-  const [input, setInput] = useState("");
-  const [isOutputAdded, setOutputAdded] = useState(false); // Flag to ensure static string is added only once
+  const [currentIndex, setCurrentIndex] = useState(0);
+  // const [isOutputAdded, setOutputAdded] = useState(false); // Flag to ensure static string is added only once
   const outputRef = useRef(null); // Reference to the output container
 
+  let allOutput = [{command: input ?? '', result: output ?? ''}];
+  
   useEffect(() => {
     if (currentIndex < output.length) {
       const timeout = setTimeout(() => {
@@ -25,13 +26,13 @@ export function Output({ output }) {
     }
   }, [displayedOutput]);
 
-  const handleInputChange = (e) => {
-    if (output && !isOutputAdded && !e.target.value) setInput(output);
-    if (!isOutputAdded && e.target.value) {
-      setInput(`${output}${e.target.value}`);
-      setOutputAdded(true);
-    } else setInput(e.target.value)
-  };
+  // const handleInputChange = (e) => {
+  //   if (output && !isOutputAdded && !e.target.value) setInput(output);
+  //   if (!isOutputAdded && e.target.value) {
+  //     setInput(`${output}${e.target.value}`);
+  //     setOutputAdded(true);
+  //   } else setInput(e.target.value)
+  // };
 
   // const handleKeyPress = (e) => {
   //   if (e.key === "Enter") {
@@ -40,20 +41,13 @@ export function Output({ output }) {
   // };
 
   return (
-    <div className="output-container" ref={outputRef}>
-      <input
-        type="text"
-        value={input}
-        onChange={handleInputChange}
-        // onKeyUp={handleKeyPress}
-        className="input-prompt"
-      />
-      <textarea
-        value={input}
-        onChange={handleInputChange}
-      >
-      </textarea>
-      <pre>{displayedOutput === output ? displayedOutput : output}</pre>
+    <div>
+      {allOutput.map((entry, index) => (
+        <div key={index}>
+          <div style={{ color: '#0ff' }}>&gt; {entry.command}</div>
+          <div>{entry.result}</div>
+        </div>
+      ))}
     </div>
   );
 }

@@ -27,7 +27,7 @@
 // src/App.js
 import React, { useState } from "react";
 import CodeEditor from "./components/CodeEditor";
-import { compileCode } from "./api";
+import { compileCode, handleIfAnynput } from "./api";
 import { Output } from "./components/Output";
 import './App.css';
 import { basicSyntax } from "./helper/constant";
@@ -35,6 +35,7 @@ import { basicSyntax } from "./helper/constant";
 function App() {
   const [language, setLanguage] = useState("javascript");
   const [code, setCode] = useState("");
+  const [input, setInput] = useState('');
   const [output, setOutput] = useState("");
 
   const handleOption = async (event) => {
@@ -44,13 +45,26 @@ function App() {
   };
 
   const handleCompile = async () => {
-    const result = await compileCode(language, code);
-    setOutput(result?.run?.output);
+    const checkAnyInput = await handleIfAnynput(language, code, input);
+    if (checkAnyInput) {
+      setOutput(checkAnyInput);
+    } else {
+      const result = await compileCode(language, code, input);
+      setOutput(result?.run?.output);
+    }
   };
 
   const resetOutput = async () => {
     setOutput('');
   }
+
+  // Function to handle form submission
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (input.trim()) {
+      setInput('');
+    }
+  };
 
   return (
     <div className="App">
@@ -69,7 +83,26 @@ function App() {
       <button onClick={resetOutput}>Clear Output</button>
       
       <CodeEditor language={language} onCodeChange={setCode} initial={code} />
-      <Output output={output} />
+      <div style={{ backgroundColor: '#000', color: '#0f0', padding: '20px', fontFamily: 'monospace', height: '100vh' }}>
+        <Output output={output} input={input} />
+        <form onSubmit={handleSubmit}>
+          <span style={{ color: '#0ff' }}>&gt;</span>
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            style={{
+              backgroundColor: 'black',
+              color: 'lime',
+              border: 'none',
+              outline: 'none',
+              width: '100%',
+              paddingLeft: '5px',
+            }}
+            autoFocus
+          />
+        </form>
+      </div>
     </div>
   );
 }
