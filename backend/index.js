@@ -18,6 +18,10 @@ const fileExtensions = {
   c: 'c',
   cpp: 'cpp',
   csharp: 'cs',
+  go: 'go',
+  kotlin: 'kts',
+  php: 'php',
+  rscript: 'R'
 };
 
 const dockerImages = {
@@ -27,14 +31,23 @@ const dockerImages = {
   c: 'gcc:latest',
   cpp: 'gcc:latest',
   csharp: 'mono:latest',
+  go: 'golang:latest',
+  kotlin: 'esolang/kotlin:latest',
+  php: 'php:latest',
+  rscript: 'rocker/rstudio:latest'
 };
+
+let fileName = 'code';
 
 io.on('connection', (socket) => {
   console.log('New client connected:', socket.id);
 
   socket.on('runCode', ({ code, language }) => {
     const fileExtension = fileExtensions[language];
-    const codeFilePath = path.join(__dirname, `code.${fileExtension}`);
+    if (['java'].includes(language)) {
+      fileName = code?.split('class ')[1].split(' ')[0];
+    }
+    const codeFilePath = path.join(__dirname, `${fileName}.${fileExtension}`);
     fs.writeFileSync(codeFilePath, code);
 
     const dockerImage = dockerImages[language];
@@ -71,10 +84,14 @@ function getRunCommand(language, codeFilePath) {
   const commands = {
     python: `python3 ${path.basename(codeFilePath)}`,
     javascript: `node ${path.basename(codeFilePath)}`,
-    java: 'javac Code.java && java Code',
+    java: `javac ${fileName}.java && java ${fileName}`,
     c: `gcc ${path.basename(codeFilePath)} -o code && ./code`,
     cpp: `g++ ${path.basename(codeFilePath)} -o code && ./code`,
     csharp: `mcs -out:code.exe ${path.basename(codeFilePath)} && mono code.exe`,
+    go: `go run ${path.basename(codeFilePath)}`,
+    kotlin: `kotlin ${path.basename(codeFilePath)}`,
+    php: `php ${path.basename(codeFilePath)}`,
+    rscript: `Rscript ${path.basename(codeFilePath)}`
   };
   return commands[language];
 }

@@ -44,6 +44,19 @@ function OnlineCompiler() {
     setUserInput('');
   };
 
+  const outputView = language === 'html' ? <div
+    className='render'
+    dangerouslySetInnerHTML={{ __html: code }}
+  ></div> : <textarea
+    className='terminal'
+    ref={ioConsoleRef}
+    value={ioConsole + userInput} // Combine output and current input
+    onKeyDown={handleKeyDown}     // Capture Enter key
+    onChange={(e) => setUserInput(e.target.value.slice(ioConsole.length))} // Allow typing without affecting output
+    rows="10"
+    placeholder="Input/Output Console"
+  />
+
   return (
     <div className='right'>
       <h1>Online Compiler</h1>
@@ -54,6 +67,11 @@ function OnlineCompiler() {
         <option value="c">C</option>
         <option value="cpp">C++</option>
         <option value="csharp">C#</option>
+        <option value="go">Go</option>
+        <option value="kotlin">Kotlin</option>
+        <option value="html">HTML/CSS</option>
+        <option value="php">PHP</option>
+        <option value="rscript">R</option>
       </select>
       
       <button onClick={handleRunCode}>Run</button>
@@ -68,15 +86,7 @@ function OnlineCompiler() {
         onChange={(newValue) => setCode(newValue)}
       />
       
-      <textarea
-        className='terminal'
-        ref={ioConsoleRef}
-        value={ioConsole + userInput} // Combine output and current input
-        onKeyDown={handleKeyDown}     // Capture Enter key
-        onChange={(e) => setUserInput(e.target.value.slice(ioConsole.length))} // Allow typing without affecting output
-        rows="10"
-        placeholder="Input/Output Console"
-      />
+      {outputView}
       </div>
     </div>
   );
