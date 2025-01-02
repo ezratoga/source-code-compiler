@@ -45,7 +45,7 @@ io.on('connection', (socket) => {
   socket.on('runCode', ({ code, language }) => {
     const fileExtension = fileExtensions[language];
     if (['java'].includes(language)) {
-      fileName = code?.split('class ')[1].split(' ')[0];
+      fileName = code?.split('class ')[1].split(/[^a-zA-Z0-9\s]|\\[ntrbfv]/gi)[0];
     }
     const codeFilePath = path.join(__dirname, `${fileName}.${fileExtension}`);
     fs.writeFileSync(codeFilePath, code);
