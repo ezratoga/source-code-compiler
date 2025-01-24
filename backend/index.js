@@ -43,18 +43,39 @@ io.on('connection', (socket) => {
   console.log('New client connected:', socket.id);
 
   socket.on('runCode', ({ code, language }) => {
+    let inputGot = '';
+
+    if (language === 'javascript' && code?.toString()?.trim()?.includes('prompt(')) {
+      const question = code?.split('prompt(')[1]?.split(')')[0];
+      const objectName = code?.split('prompt(')[0]?.split('=')[0].split(' ')[1];
+      const codeToInclude = code?.trim()?.includes(`${question};`) ? 
+        code?.split('prompt(')[1]?.replace(`${question});`, '') : 
+        code?.split('prompt(')[1]?.replace(`${question})`, '');
+      inputGot += `const readline = require('readline');
+
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+        });
+
+      rl.question(${question}, (${objectName}) => {
+        ${codeToInclude}
+        rl.close();
+      });`
+    } else inputGot += code;
+
     const fileExtension = fileExtensions[language];
     if (['java'].includes(language)) {
-      fileName = code?.split('class ')[1].split(/[^a-zA-Z0-9\s]|\\[ntrbfv]/gi)[0];
+      fileName = inputGot?.split('class ')[1].split(/[^a-zA-Z0-9\s]|\\[ntrbfv]/gi)[0];
     }
     const codeFilePath = path.join(__dirname, `${fileName}.${fileExtension}`);
-    fs.writeFileSync(codeFilePath, code);
+    fs.writeFileSync(codeFilePath, inputGot);
 
     const dockerImage = dockerImages[language];
     const command = `docker run --rm -i -v "${__dirname}:/app" -w /app ${dockerImage} sh -c "${getRunCommand(language, codeFilePath)}"`;
 
     // Start Docker process with interactive mode
-    const dockerProcess = spawn(command, { shell: true, stdio: ['pipe', 'pipe', 'pipe'] });
+    const dockerProcess = spawn(command, { shell: true, stdio: ['pipe', 'pipe', 'pipe', 'inherit'] });
 
     dockerProcess.stdout.on('data', (data) => {
       socket.emit('output', data.toString());
@@ -91,7 +112,7 @@ function getRunCommand(language, codeFilePath) {
     go: `go run ${path.basename(codeFilePath)}`,
     kotlin: `kotlin ${path.basename(codeFilePath)}`,
     php: `php ${path.basename(codeFilePath)}`,
-    rscript: `Rscript ${path.basename(codeFilePath)}`
+    rscript: `R -e "source('${path.basename(codeFilePath)}')`
   };
   return commands[language];
 }
