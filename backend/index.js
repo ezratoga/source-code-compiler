@@ -1,7 +1,7 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-const { spawn } = require('child_process');
+const { spawn, exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
@@ -66,7 +66,7 @@ io.on('connection', (socket) => {
 
     const fileExtension = fileExtensions[language];
     if (['java'].includes(language)) {
-      fileName = inputGot?.split('class ')[1].split(/[^a-zA-Z0-9\s]|\\[ntrbfv]/gi)[0];
+      fileName = inputGot?.split('class ')[1].split(/[^a-zA-Z0-9\s ]|\\[ntrbfv]/gi)[0]?.trim();
     }
     const codeFilePath = path.join(__dirname, `${fileName}.${fileExtension}`);
     fs.writeFileSync(codeFilePath, inputGot);
@@ -75,26 +75,33 @@ io.on('connection', (socket) => {
     const command = `docker run --rm -i -v "${__dirname}:/app" -w /app ${dockerImage} sh -c "${getRunCommand(language, codeFilePath)}"`;
 
     // Start Docker process with interactive mode
-    const dockerProcess = spawn(command, { shell: true, stdio: ['pipe', 'pipe', 'pipe', 'inherit'] });
+    // const dockerProcess = spawn(command, { shell: true, stdio: ['pipe', 'pipe', 'pipe', 'inherit'] });
 
+    const dockerProcess = exec(command, { shell: true });
+
+    // Capture stdout and send to the frontend
     dockerProcess.stdout.on('data', (data) => {
       socket.emit('output', data.toString());
     });
-
+  
+    // Capture stderr and send to the frontend
     dockerProcess.stderr.on('data', (data) => {
       socket.emit('output', data.toString());
     });
-
-    // Listen for input from the frontend and send it to the Docker process stdin
+  
+    // Handle input from the frontend (not ideal with exec, workaround needed)
     socket.on('input', (input) => {
-      dockerProcess.stdin.write(input + '\n');
+      if (dockerProcess.stdin) {
+        dockerProcess.stdin.write(input + '\n');
+      }
     });
-
-    // No longer emit exit code
+  
+    // Emit empty output when process closes
     dockerProcess.on('close', () => {
       socket.emit('output', '\n');
     });
-
+  
+    // Kill process if the client disconnects
     socket.on('disconnect', () => {
       dockerProcess.kill();
     });
