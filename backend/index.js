@@ -119,7 +119,7 @@ function getRunCommand(language, codeFilePath) {
     go: `go run ${path.basename(codeFilePath)}`,
     kotlin: `kotlin ${path.basename(codeFilePath)}`,
     php: `php ${path.basename(codeFilePath)}`,
-    rscript: `R -e "source('${path.basename(codeFilePath)}')`
+    rscript: `Rscript ${path.basename(codeFilePath)}`
   };
   return commands[language];
 }

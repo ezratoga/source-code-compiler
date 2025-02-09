@@ -4,3 +4,5 @@
 code.*
 code*
 *.R
+*.c
+*.cpp
